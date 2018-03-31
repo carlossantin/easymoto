@@ -1,4 +1,4 @@
-package com.easymoto.city;
+package com.easymoto.city.controller;
 
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 
 @Configuration
 @ComponentScan
-@EntityScan("com.easymoto.city")
+@EntityScan("com.easymoto.city.domain")
 @EnableJpaRepositories("com.easymoto.city")
 @PropertySource("classpath:db-config.properties")
 public class CityConfiguration {

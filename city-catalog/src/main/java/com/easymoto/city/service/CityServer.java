@@ -1,4 +1,4 @@
-package com.easymoto.services.city;
+package com.easymoto.city.service;
 
 import java.util.logging.Logger;
 
@@ -9,7 +9,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Import;
 
 import com.easymoto.city.CityRepository;
-import com.easymoto.city.CityConfiguration;
+import com.easymoto.city.controller.CityConfiguration;
 
 @EnableAutoConfiguration
 @EnableDiscoveryClient

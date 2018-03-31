@@ -1,4 +1,4 @@
-package com.easymoto.city;
+package com.easymoto.city.domain;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -23,17 +23,25 @@ public class City implements Serializable {
     this.name = name;
   }
 
+  protected City() {
+  }
+
   @Id
   private Integer id;
 
   @Column(name = "name")
   private String name;
   
-  private String getName() {
+  public String getName() {
     return this.name;
   }
   
-  private Integer getId() {
+  public Integer getId() {
     return this.id;
+  }
+
+  @Override
+  public String toString() {
+   return name + " [" + id + "]";
   }
 }

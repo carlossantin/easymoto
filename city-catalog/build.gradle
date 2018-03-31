@@ -11,7 +11,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
 version = '0.1.0-SNAPSHOT'
-mainClassName = "com.easymoto.services.city.CityServer"
+mainClassName = "com.easymoto.city.service.CityServer"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
