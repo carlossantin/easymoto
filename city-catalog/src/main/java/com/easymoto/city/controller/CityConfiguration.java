@@ -14,8 +14,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import java.util.List;
 import java.util.Map;
 import org.springframework.context.annotation.Bean;
+import org.springframework.boot.SpringBootConfiguration;
 
-@Configuration
+@SpringBootConfiguration
 @ComponentScan
 @EntityScan("com.easymoto.city.domain")
 @EnableJpaRepositories("com.easymoto.city")

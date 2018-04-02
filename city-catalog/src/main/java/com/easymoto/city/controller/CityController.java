@@ -15,6 +15,7 @@ import com.easymoto.city.domain.City;
 import com.easymoto.city.CityRepository;
 import com.easymoto.city.exception.DuplicatedCityException;
 import com.easymoto.city.exception.MandatoryAttributeException;
+import com.easymoto.city.exception.NonExistingCityException;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -79,8 +80,16 @@ public class CityController {
     final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
 
     //Check mandatory attributes
-    if (cityToId == null || cityName == null) {
+    if (cityId == null || cityName == null) {
       throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
+    }
+
+    //Check if the destination city exists
+    if (cityToId != null) {
+      final City city = cityRepository.findById(cityToId);
+      if (city == null) {
+        throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
+      }
     }
 
     //Check if the city already exists
