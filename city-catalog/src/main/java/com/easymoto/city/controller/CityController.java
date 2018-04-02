@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.easymoto.city.domain.City;
 import com.easymoto.city.CityRepository;
 import com.easymoto.city.exception.DuplicatedCityException;
+import com.easymoto.city.exception.MandatoryAttributeException;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -71,19 +72,30 @@ public class CityController {
   @RequestMapping(
     value="/add-city", 
     method = RequestMethod.POST)
-  public void addCity(@RequestBody Map<String, String> payload) {
-    final Integer cityId = Integer.valueOf(payload.get("id"));
+  public City addCity(@RequestBody Map<String, String> payload) {
+    final Integer cityId = getIntegerValueFromMap(payload, "id");
     final String cityName = payload.get("name");
-    final Integer distance = Integer.valueOf(payload.get("distance"));
-    final Integer cityToId = Integer.valueOf(payload.get("to_id"));
+    final Integer distance = getIntegerValueFromMap(payload, "distance");
+    final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
 
-    //Check if the city already exists
-    final City city = cityRepository.findById(cityId);
-    if (city != null) {
-      throw new DuplicatedCityException("Duplicated city id: " + cityId);
+    //Check mandatory attributes
+    if (cityToId == null || cityName == null) {
+      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
     }
 
-    cityRepository.save(new City(cityId, cityName));
+    //Check if the city already exists
+    City city = cityRepository.findById(cityId);
+    if (city != null) {
+      throw new DuplicatedCityException(String.format("Duplicated city id: %s", cityId));
+    }
+
+    city = cityRepository.save(new City(cityId, cityName));
+    return city;
+  }
+
+  private Integer getIntegerValueFromMap(final Map<String, String> payload, final String key) {
+    final String strValue = payload.get(key);
+    return strValue != null ? Integer.valueOf(strValue) : null;
   }
 
 
