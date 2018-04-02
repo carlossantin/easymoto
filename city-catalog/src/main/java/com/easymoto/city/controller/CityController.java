@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.easymoto.city.domain.City;
 import com.easymoto.city.CityRepository;
+import com.easymoto.city.exception.DuplicatedCityException;
 
 import java.util.Map;
+import java.util.function.Function;
 
 
 /**
@@ -69,8 +71,20 @@ public class CityController {
   @RequestMapping(
     value="/add-city", 
     method = RequestMethod.POST)
-  public void addCity(@RequestBody Map<String, Object> city) {
-    logger.info("Received: " + city);
+  public void addCity(@RequestBody Map<String, String> payload) {
+    final Integer cityId = Integer.valueOf(payload.get("id"));
+    final String cityName = payload.get("name");
+    final Integer distance = Integer.valueOf(payload.get("distance"));
+    final Integer cityToId = Integer.valueOf(payload.get("to_id"));
+
+    //Check if the city already exists
+    final City city = cityRepository.findById(cityId);
+    if (city != null) {
+      throw new DuplicatedCityException("Duplicated city id: " + cityId);
+    }
+
+    cityRepository.save(new City(cityId, cityName));
   }
+
 
 }

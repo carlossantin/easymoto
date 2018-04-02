@@ -21,6 +21,8 @@ public interface CityRepository extends Repository<City, Integer> {
    */
   public City findById(Integer id);
 
+  public City save(City city);
+
   /**
    * Fetch the number of cities known to the system.
    * 
