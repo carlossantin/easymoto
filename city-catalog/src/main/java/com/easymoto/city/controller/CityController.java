@@ -6,11 +6,15 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.easymoto.city.domain.City;
 import com.easymoto.city.CityRepository;
+
+import java.util.Map;
 
 
 /**
@@ -54,6 +58,19 @@ public class CityController {
     logger.info("city-service byId() found: " + city);
 
     return city;
+  }
+
+  /**
+   * Add a new city
+   * 
+   * @param city
+   *            A Json object having the fields: id, name, distance, toId.
+   */
+  @RequestMapping(
+    value="/add-city", 
+    method = RequestMethod.POST)
+  public void addCity(@RequestBody Map<String, Object> city) {
+    logger.info("Received: " + city);
   }
 
 }
