@@ -16,6 +16,7 @@ import com.easymoto.city.CityRepository;
 import com.easymoto.city.exception.DuplicatedCityException;
 import com.easymoto.city.exception.MandatoryAttributeException;
 import com.easymoto.city.exception.NonExistingCityException;
+import com.easymoto.city.exception.EqualOriginDestinationCityException;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -76,20 +77,10 @@ public class CityController {
   public City addCity(@RequestBody Map<String, String> payload) {
     final Integer cityId = getIntegerValueFromMap(payload, "id");
     final String cityName = payload.get("name");
-    final Integer distance = getIntegerValueFromMap(payload, "distance");
-    final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
 
     //Check mandatory attributes
     if (cityId == null || cityName == null) {
       throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
-    }
-
-    //Check if the destination city exists
-    if (cityToId != null) {
-      final City city = cityRepository.findById(cityToId);
-      if (city == null) {
-        throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
-      }
     }
 
     //Check if the city already exists
@@ -100,6 +91,44 @@ public class CityController {
 
     city = cityRepository.save(new City(cityId, cityName));
     return city;
+  }
+
+  @RequestMapping(
+    value="/add-distance", 
+    method = RequestMethod.POST)
+  public void addDistance(@RequestBody Map<String, String> payload) {
+    final Integer cityId = getIntegerValueFromMap(payload, "id");
+    final Integer distance = getIntegerValueFromMap(payload, "distance");
+    final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
+
+    //Check mandatory attributes
+    if (cityId == null || distance == null || cityToId == null) {
+      throw new MandatoryAttributeException(String.format("{id: %s, distance: %s, to_id: %s}", cityId, distance, cityToId));
+    }
+
+    //Check if origin city and destination city are diferent
+    if (cityId.equals(cityToId)) {
+      throw new EqualOriginDestinationCityException(String.format("The origin city and the destination city are the same {id: %s, to_id: %s}", cityId, cityToId));
+    }
+
+    //Check if the origin city exists
+    final City cityFrom = cityRepository.findById(cityId);
+    if (cityFrom == null) {
+      throw new NonExistingCityException(String.format("Origin city does not exist. Id: %s", cityId));
+    }
+
+    //Check if the destination city exists
+    final City cityTo = cityRepository.findById(cityToId);
+    if (cityTo == null) {
+      throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
+    }
+
+    cityFrom.addDistance(cityTo.getId(), distance);
+    cityRepository.save(cityFrom);
+
+    cityTo.addDistance(cityFrom.getId(), distance);
+    cityRepository.save(cityTo);
+
   }
 
   private Integer getIntegerValueFromMap(final Map<String, String> payload, final String key) {
