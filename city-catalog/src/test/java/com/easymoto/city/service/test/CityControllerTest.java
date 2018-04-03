@@ -135,10 +135,35 @@ public class CityControllerTest {
     payload.put("to_id", "-6");
     controller.addDistance(payload);
 
-    City cityOrigin = controller.byId("-5");
-    City cityDestination = controller.byId("-6");
+    City cityOrigin = controller.byId(-5);
+    City cityDestination = controller.byId(-6);
 
     assertEquals(Integer.valueOf(30), (Integer)cityOrigin.getDistance(-6));
     assertEquals(Integer.valueOf(30), (Integer)cityDestination.getDistance(-5));
+  }
+
+  @Test(expected = NonExistingCityException.class)
+  public void testUpdateNonExistingCity() throws Exception {
+    Map<String, String> payload = new HashMap();
+    payload.put("id", "-1000");
+    payload.put("name", "cityNotExistent");
+    controller.updateCity(payload);
+  }
+
+  @Test
+  public void testUpdateCity() throws Exception {
+    Map<String, String> payload = new HashMap();
+    payload.put("id", "-7");
+    payload.put("name", "oldCityName");
+    controller.addCity(payload);
+
+    City city = controller.byId(-7);
+    assertEquals("oldCityName", city.getName());
+
+    payload.put("name", "newCityName");
+    controller.updateCity(payload);
+
+    city = controller.byId(-7);
+    assertEquals("newCityName", city.getName());
   }
 }

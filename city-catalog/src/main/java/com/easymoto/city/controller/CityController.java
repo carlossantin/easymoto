@@ -56,10 +56,10 @@ public class CityController {
    * @return The city if found.
    */
   @RequestMapping("/city/{id}")
-  public City byId(@PathVariable("id") String id) {
+  public City byId(@PathVariable("id") Integer id) {
 
     logger.info("city-service byId() invoked: " + id);
-    City city = cityRepository.findById(Integer.valueOf(id));
+    City city = cityRepository.findById(id);
     logger.info("city-service byId() found: " + city);
 
     return city;
@@ -68,8 +68,8 @@ public class CityController {
   /**
    * Add a new city
    * 
-   * @param city
-   *            A Json object having the fields: id, name, distance, toId.
+   * @param payload
+   *            A Json object having the fields id and name
    */
   @RequestMapping(
     value="/add-city", 
@@ -134,6 +134,36 @@ public class CityController {
   private Integer getIntegerValueFromMap(final Map<String, String> payload, final String key) {
     final String strValue = payload.get(key);
     return strValue != null ? Integer.valueOf(strValue) : null;
+  }
+
+  /**
+   * Add a new city
+   * 
+   * @param payload
+   *            A Json object having the fields id and name.
+   */
+  @RequestMapping(
+    value="/update-city", 
+    method = RequestMethod.POST)
+  public City updateCity(@RequestBody Map<String, String> payload) {
+    final Integer cityId = getIntegerValueFromMap(payload, "id");
+    final String cityName = payload.get("name");
+
+    //Check mandatory attributes
+    if (cityId == null || cityName == null) {
+      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
+    }
+
+    //Check if the city exists
+    City city = cityRepository.findById(cityId);
+    if (city == null) {
+      throw new NonExistingCityException(String.format("The city to be updated does not exist. Id: %s", cityId));
+    }
+
+    city.setName(cityName);
+
+    city = cityRepository.save(city);
+    return city;
   }
 
 

@@ -54,6 +54,10 @@ public class City implements Serializable {
     return this.id;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public Integer getDistance(Integer toCityId) {
     return distances.get(toCityId);
   }
