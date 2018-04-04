@@ -3,7 +3,7 @@ package com.easymoto.city;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.CrudRepository;
 
 import com.easymoto.city.domain.City;
 
@@ -12,7 +12,7 @@ import com.easymoto.city.domain.City;
  * 
  * @author Carlos E. Santin <cesantin@gmail.com>
  */
-public interface CityRepository extends Repository<City, Integer> {
+public interface CityRepository extends CrudRepository<City, Integer> {
   /**
    * Find an city with the specified id.
    *

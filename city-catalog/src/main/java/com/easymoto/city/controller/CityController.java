@@ -52,7 +52,7 @@ public class CityController {
    * Fetch a city with the specified id.
    * 
    * @param id
-   *            An integer value.
+   *            An integer value representing the city id.
    * @return The city if found.
    */
   @RequestMapping("/city/{id}")
@@ -72,7 +72,7 @@ public class CityController {
    *            A Json object having the fields id and name
    */
   @RequestMapping(
-    value="/add-city", 
+    value="/city/add", 
     method = RequestMethod.POST)
   public City addCity(@RequestBody Map<String, String> payload) {
     final Integer cityId = getIntegerValueFromMap(payload, "id");
@@ -94,7 +94,7 @@ public class CityController {
   }
 
   @RequestMapping(
-    value="/add-distance", 
+    value="/distance/add", 
     method = RequestMethod.POST)
   public void addDistance(@RequestBody Map<String, String> payload) {
     final Integer cityId = getIntegerValueFromMap(payload, "id");
@@ -137,13 +137,13 @@ public class CityController {
   }
 
   /**
-   * Add a new city
+   * Update a city
    * 
    * @param payload
    *            A Json object having the fields id and name.
    */
   @RequestMapping(
-    value="/update-city", 
+    value="/city/update", 
     method = RequestMethod.POST)
   public City updateCity(@RequestBody Map<String, String> payload) {
     final Integer cityId = getIntegerValueFromMap(payload, "id");
@@ -164,6 +164,26 @@ public class CityController {
 
     city = cityRepository.save(city);
     return city;
+  }
+
+  /**
+   * Remove a city
+   * 
+   * @param id
+   *            An integer value representing the city id.
+   */
+  @RequestMapping(
+    value="/city/remove/{id}", 
+    method = RequestMethod.POST)
+  public void removeCity(@PathVariable("id") Integer id) {
+
+    //Check if the city exists
+    final City city = cityRepository.findById(id);
+    if (city == null) {
+      throw new NonExistingCityException(String.format("The city to be removed does not exist. Id: %s", id));
+    }
+
+    cityRepository.delete(city);
   }
 
 

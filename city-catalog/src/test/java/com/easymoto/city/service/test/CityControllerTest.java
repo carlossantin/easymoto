@@ -166,4 +166,77 @@ public class CityControllerTest {
     city = controller.byId(-7);
     assertEquals("newCityName", city.getName());
   }
+
+  @Test
+  public void testUpdateDistancesWhenRemovingDestinationCity() throws Exception {
+    Map<String, String> payload = new HashMap();
+    payload.put("id", "-8");
+    payload.put("name", "cityFrom");
+    controller.addCity(payload);
+
+    payload.put("id", "-9");
+    payload.put("name", "cityTo");
+    controller.addCity(payload);
+
+    payload.put("id", "-8");
+    payload.put("distance", "30");
+    payload.put("to_id", "-9");
+    controller.addDistance(payload);
+
+    City cityFrom = controller.byId(-8);
+    assertEquals(Integer.valueOf(30), cityFrom.getDistance(-9));
+
+    controller.removeCity(-9);
+
+    cityFrom = controller.byId(-8);
+    assertThat(cityFrom.getDistance(-9)).isNull();
+  }
+
+  @Test
+  public void testUpdateDistancesWhenRemovingOriginCity() throws Exception {
+    Map<String, String> payload = new HashMap();
+    payload.put("id", "-11");
+    payload.put("name", "cityFrom");
+    controller.addCity(payload);
+
+    payload.put("id", "-12");
+    payload.put("name", "cityTo");
+    controller.addCity(payload);
+
+    payload.put("id", "-11");
+    payload.put("distance", "30");
+    payload.put("to_id", "-12");
+    controller.addDistance(payload);
+
+    City cityFrom = controller.byId(-11);
+    assertEquals(Integer.valueOf(30), cityFrom.getDistance(-12));
+
+    controller.removeCity(-11);
+
+    cityFrom = controller.byId(-12);
+    assertThat(cityFrom.getDistance(-11)).isNull();
+  }
+
+  @Test
+  public void testRemovingCity() throws Exception {
+    Map<String, String> payload = new HashMap();
+    payload.put("id", "-10");
+    payload.put("name", "cityToBeRemoved");
+    controller.addCity(payload);
+
+    City city = controller.byId(-10);
+    assertThat(city).isNotNull();
+
+    controller.removeCity(-10);
+
+    city = controller.byId(-10);
+    assertThat(city).isNull();
+  }
+
+  @Test(expected = NonExistingCityException.class)
+  public void testRemovingNonExistingCity() throws Exception {
+    controller.removeCity(-99999);
+  }
+
+  
 }

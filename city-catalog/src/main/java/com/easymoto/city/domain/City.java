@@ -13,7 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.FetchType;
 
-
 /**
  * Persistent city entity with JPA markup. Cities are stored in an H2
  * relational database.
@@ -65,6 +64,16 @@ public class City implements Serializable {
   public void addDistance(Integer toCityId, Integer distance) {
     distances.put(toCityId, distance);
   }
+
+  public void removeDistance(Integer toCityId) {
+    distances.remove(toCityId);
+  }
+
+  public Map<Integer, Integer> getDistances() {
+    return this.distances;
+  }
+
+
 
   @Override
   public String toString() {
