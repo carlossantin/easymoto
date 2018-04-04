@@ -3,4 +3,5 @@ rootProject.name = 'easymoto-builder'
 // Include here the subprojects to build
 // e.g.: include 'service-registration'
 include 'service-registration'
+include 'city-catalog'
 include 'facade-service'
