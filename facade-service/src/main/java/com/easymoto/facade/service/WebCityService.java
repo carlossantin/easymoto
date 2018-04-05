@@ -1,6 +1,7 @@
 package com.easymoto.facade.service;
 
 import com.easymoto.facade.dto.City;
+import static com.easymoto.facade.util.ValuesUtil.getIntegerValueFromMap;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,9 +48,17 @@ public class WebCityService {
 
   public City addCity(Map<String, String> payload) {
     logger.info("addCity() invoked");
-    ResponseEntity<City> entity = restTemplate.postForEntity(serviceUrl + "/city/add", payload,
-        City.class);
-    return entity.getBody();
+    final Integer cityId = getIntegerValueFromMap(payload, "id");
+    City city = findById(cityId);
+    ResponseEntity<City> entity = null;
+    if (city == null) {
+      entity = restTemplate.postForEntity(serviceUrl + "/city/add", payload, City.class);
+    }
+    restTemplate.postForEntity(serviceUrl + "/distance/add", payload,
+        Void.class);
+
+    city = findById(cityId);
+    return city;
   }
 
   public void removeCity(Integer id) {
@@ -69,8 +78,8 @@ public class WebCityService {
         City.class);
 
     return cityUpdated;
-    // logger.info("reloading city "+cityUpdated.getId());
-    // return findById(cityUpdated.getId());
+  }
+
   }
 
 }

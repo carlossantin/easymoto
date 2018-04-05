@@ -2,6 +2,7 @@ package com.easymoto.facade.controller;
 
 import com.easymoto.facade.dto.City;
 import com.easymoto.facade.service.WebCityService;
+import static com.easymoto.facade.util.ValuesUtil.getIntegerValueFromMap;
 
 import java.util.List;
 import java.util.Map;
@@ -87,9 +88,6 @@ public class WebCityController {
     return cityResponse;
   }
 
-  private Integer getIntegerValueFromMap(final Map<String, String> payload, final String key) {
-    final String strValue = payload.get(key);
-    return strValue != null ? Integer.valueOf(strValue) : null;
   }
 
 }
