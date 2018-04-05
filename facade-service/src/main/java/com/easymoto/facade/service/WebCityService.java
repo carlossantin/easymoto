@@ -17,6 +17,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus; 
 
 /**
  * Hide the access to the microservice inside this local service.
@@ -78,6 +79,19 @@ public class WebCityService {
         City.class);
 
     return cityUpdated;
+  }
+
+  /** 
+   * Check if all services are up 
+   */ 
+  public HttpStatus checkHealth() { 
+    //TODO: Check if the database is OK 
+    try { 
+      ResponseEntity<Object> entity = restTemplate.getForEntity(serviceUrl + "/health.json", Object.class); 
+      return entity.getStatusCode(); 
+    } catch (Exception e) { 
+      return HttpStatus.INTERNAL_SERVER_ERROR; 
+    } 
   }
 
 }

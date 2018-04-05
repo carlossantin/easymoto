@@ -88,4 +88,11 @@ public class WebCityController {
     return cityResponse;
   }
 
+  @RequestMapping( 
+    value="/router/health",  
+    method = RequestMethod.GET) 
+  public Integer checkHealth() { 
+    return cityService.checkHealth().value(); 
+  }
+
 }
