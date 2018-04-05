@@ -122,6 +122,10 @@ To show a complete example let's run the following commands to populate our city
   curl -H "Content-Type: application/json" -X POST -d "{"id":"606","Operation":"ADD","distance":"1","to_id":"605"}" http://localhost:3333/router/city  
   ```
 
+The above commands will create the following graph:
+
+![Sample graph of connected cities](graph-sample.png)
+
 And now let's check the shortest path between the City 2 and the City 3:
 
   ```
