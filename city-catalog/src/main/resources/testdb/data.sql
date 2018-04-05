@@ -1,0 +1,21 @@
+insert into city (id, name) values (1, 'A');
+insert into city (id, name) values (2, 'B');
+insert into city (id, name) values (3, 'C');
+insert into city (id, name) values (4, 'D');
+insert into city (id, name) values (5, 'E');
+insert into city (id, name) values (6, 'F');
+
+insert into city_distance (from_id, to_id, distance) values (1, 2, 10);
+insert into city_distance (from_id, to_id, distance) values (1, 3, 5);
+insert into city_distance (from_id, to_id, distance) values (2, 1, 10);
+insert into city_distance (from_id, to_id, distance) values (2, 5, 8);
+insert into city_distance (from_id, to_id, distance) values (2, 4, 3);
+insert into city_distance (from_id, to_id, distance) values (3, 1, 5);
+insert into city_distance (from_id, to_id, distance) values (3, 5, 4);
+insert into city_distance (from_id, to_id, distance) values (4, 2, 3);
+insert into city_distance (from_id, to_id, distance) values (4, 6, 2);
+insert into city_distance (from_id, to_id, distance) values (5, 3, 4);
+insert into city_distance (from_id, to_id, distance) values (5, 2, 8);
+insert into city_distance (from_id, to_id, distance) values (5, 6, 1);
+insert into city_distance (from_id, to_id, distance) values (6, 4, 2);
+insert into city_distance (from_id, to_id, distance) values (6, 5, 1);
