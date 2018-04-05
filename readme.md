@@ -34,10 +34,12 @@ After clonning this project you must build and launch each microservice.
 
 To launch the microservices, run the following commands:
 
-  java -jar .\service-registration\build\libs\service-registration-0.1.0-SNAPSHOT.jar
-  java -jar .\city-catalog\build\libs\city-catalog-0.1.0-SNAPSHOT.jar
-  java -jar .\shortest-route-calculator\build\libs\shortest-route-calculator-0.1.0-SNAPSHOT.jar
-  java -jar .\facade-service\build\libs\facade-service-0.1.0-SNAPSHOT.jar
+  ```
+  java -jar .\service-registration\build\libs\service-registration-0.1.0-SNAPSHOT.jar  
+  java -jar .\city-catalog\build\libs\city-catalog-0.1.0-SNAPSHOT.jar  
+  java -jar .\shortest-route-calculator\build\libs\shortest-route-calculator-0.1.0-SNAPSHOT.jar  
+  java -jar .\facade-service\build\libs\facade-service-0.1.0-SNAPSHOT.jar  
+  ```
 
 Each one of the above commands will start a tomcat instance.
 
