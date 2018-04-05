@@ -55,8 +55,10 @@ public class WebCityService {
     if (city == null) {
       entity = restTemplate.postForEntity(serviceUrl + "/city/add", payload, City.class);
     }
-    restTemplate.postForEntity(serviceUrl + "/distance/add", payload,
+    if (payload.get("to_id") != null) {
+      restTemplate.postForEntity(serviceUrl + "/distance/add", payload,
         Void.class);
+    }
 
     city = findById(cityId);
     return city;
