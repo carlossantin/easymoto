@@ -1,4 +1,4 @@
-package com.easymoto.facade.dto;
+package com.easymoto.route.dto;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Data Transfer Object for Cities
+ *  Data Transfer Object for Cities
  * 
  * @author Carlos E. Santin <cesantin@gmail.com>
  */

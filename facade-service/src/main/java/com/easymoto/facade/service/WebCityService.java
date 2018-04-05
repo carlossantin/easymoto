@@ -88,7 +88,7 @@ public class WebCityService {
     //TODO: Check if the database is OK 
     try { 
       ResponseEntity<Object> entity = restTemplate.getForEntity(serviceUrl + "/health.json", Object.class); 
-      return entity.getStatusCode(); 
+      return entity.getStatusCode() == HttpStatus.OK ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR; 
     } catch (Exception e) { 
       return HttpStatus.INTERNAL_SERVER_ERROR; 
     } 
