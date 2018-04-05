@@ -17,6 +17,7 @@ import com.easymoto.city.exception.DuplicatedCityException;
 import com.easymoto.city.exception.MandatoryAttributeException;
 import com.easymoto.city.exception.NonExistingCityException;
 import com.easymoto.city.exception.EqualOriginDestinationCityException;
+import static com.easymoto.city.util.ValuesUtil.getIntegerValueFromMap;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -66,6 +67,20 @@ public class CityController {
   }
 
   /**
+   * Get all recorded cities
+   * 
+   * @return A list of cities
+   */
+  @RequestMapping("/city/all")
+  public Iterable<City> findAll() {
+
+    logger.info("city-service findAll() invoked");
+    Iterable<City> cities = cityRepository.findAll();
+
+    return cities;
+  }
+
+  /**
    * Add a new city
    * 
    * @param payload
@@ -112,28 +127,22 @@ public class CityController {
     }
 
     //Check if the origin city exists
-    final City cityFrom = cityRepository.findById(cityId);
+    City cityFrom = cityRepository.findById(cityId);
     if (cityFrom == null) {
       throw new NonExistingCityException(String.format("Origin city does not exist. Id: %s", cityId));
     }
 
     //Check if the destination city exists
-    final City cityTo = cityRepository.findById(cityToId);
+    City cityTo = cityRepository.findById(cityToId);
     if (cityTo == null) {
       throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
     }
 
-    cityFrom.addDistance(cityTo.getId(), distance);
-    cityRepository.save(cityFrom);
+    cityFrom.addDistance(cityTo, distance);
+    cityFrom = cityRepository.save(cityFrom);
 
-    cityTo.addDistance(cityFrom.getId(), distance);
-    cityRepository.save(cityTo);
-
-  }
-
-  private Integer getIntegerValueFromMap(final Map<String, String> payload, final String key) {
-    final String strValue = payload.get(key);
-    return strValue != null ? Integer.valueOf(strValue) : null;
+    cityTo.addDistance(cityFrom, distance);
+    cityTo = cityRepository.save(cityTo);
   }
 
   /**
