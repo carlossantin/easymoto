@@ -12,6 +12,11 @@ import javax.persistence.CollectionTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.FetchType;
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Persistent city entity with JPA markup. Cities are stored in an H2
@@ -20,6 +25,7 @@ import javax.persistence.FetchType;
  * @author Carlos E. Santin <cesantin@gmail.com>
  */
 @Entity
+@Embeddable
 @Table(name = "city")
 public class City implements Serializable {
   
@@ -31,11 +37,19 @@ public class City implements Serializable {
   @Column(name = "name")
   private String name;
 
-  @ElementCollection(fetch = FetchType.EAGER)
+  // TODO: Use a Map instead of a List for city distances. 
+  // It was used a list because of problems on converting the json created to this map to a Java object
+  // on restTemplate methods.
+
+  /*@ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "city_distance", joinColumns = @JoinColumn(name = "from_id"))
   @MapKeyColumn(name="to_id")
   @Column(name = "distance")
-  private Map<Integer, Integer> distances = new HashMap<Integer, Integer>();
+  private Map<City, Integer> distances = new HashMap<City, Integer>();*/
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "city_distance", joinColumns = @JoinColumn(name = "from_id"))
+  List<CityDistance> distances = new ArrayList();
 
   public City(Integer id, String name) {
     this.id = id;
@@ -57,26 +71,46 @@ public class City implements Serializable {
     this.name = name;
   }
 
-  public Integer getDistance(Integer toCityId) {
-    return distances.get(toCityId);
+  public Integer getDistance(City toCityId) {
+    int idx = distances.indexOf(new CityDistance(toCityId.getId(), -1));
+    if (idx > -1) {
+      return distances.get(idx).getDistance();
+    }
+    return null;
   }
 
-  public void addDistance(Integer toCityId, Integer distance) {
-    distances.put(toCityId, distance);
+  public void addDistance(City toCityId, Integer distance) {    
+    this.removeDistance(toCityId);
+    distances.add(new CityDistance(toCityId.getId(), distance));
   }
 
-  public void removeDistance(Integer toCityId) {
-    distances.remove(toCityId);
+  public void removeDistance(City toCityId) {
+    int idx = distances.indexOf(new CityDistance(toCityId.getId(), -1));
+    if (idx > -1) {
+      distances.remove(idx);
+    }
   }
 
-  public Map<Integer, Integer> getDistances() {
+  public List<CityDistance> getDistances() {
     return this.distances;
   }
 
-
-
   @Override
   public String toString() {
-   return name + " [" + id + "]";
+    return String.format("%s [%s]", name, id);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(o instanceof City && ((City)o).getId().equals(this.id)) {
+        return true;
+    } else {
+        return false;
+    }
+  }
+
+  @Override
+  public int hashCode(){
+    return 37 * this.id;
   }
 }
