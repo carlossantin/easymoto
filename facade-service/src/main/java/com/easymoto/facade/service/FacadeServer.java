@@ -1,6 +1,6 @@
 package com.easymoto.facade.service;
 
-import com.easymoto.facade.controller.WebCityController;
+import com.easymoto.facade.controller.WebController;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,6 +27,7 @@ public class FacadeServer {
    * doesn't matter.
    */
   public static final String CITY_SERVICE_URL = "http://CITY-SERVICE";
+  public static final String ROUTE_SERVICE_URL = "http://ROUTE-SERVICE";
 
   /**
    * Run the application using Spring Boot and an embedded servlet engine.
@@ -68,8 +69,18 @@ public class FacadeServer {
    * @return
    */
   @Bean
-  public WebCityController cityController() {
-    return new WebCityController(cityService());
+  public WebController cityController() {
+    return new WebController(cityService(), routeService());
+  }
+
+  /**
+   * The RouteService encapsulates the interaction with the micro-service.
+   * 
+   * @return A new service instance.
+   */
+  @Bean
+  public WebRouteService routeService() {
+    return new WebRouteService(ROUTE_SERVICE_URL);
   }
 
 }

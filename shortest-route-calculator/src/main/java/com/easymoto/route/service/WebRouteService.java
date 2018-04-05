@@ -6,6 +6,7 @@ import com.easymoto.route.processor.Graph;
 import com.easymoto.route.processor.Node;
 import com.easymoto.route.processor.ShortestRouteProcessor;
 import com.easymoto.route.processor.ShortestRouteProcessorFactory;
+import com.easymoto.route.exception.NonExistingCityException;
 
 import java.util.logging.Logger;
 import java.util.Map;
@@ -61,6 +62,11 @@ public class WebRouteService {
   public List<Map<String, String>> calculateShortestRoute(Integer origin, Integer destination) {
     City cityOrigin = findById(origin);
     City cityDestination = findById(destination);
+
+    if (cityOrigin == null || cityDestination == null) {
+      String msg = String.format("Non existing city detected. Origin: %s, Destination: %s", cityOrigin, cityDestination);
+      throw new NonExistingCityException(msg);
+    }
 
     ShortestRouteProcessor routeProcessor = ShortestRouteProcessorFactory.getShortestRouteProcessor();
     final City[] allCities = loadAllCities();
