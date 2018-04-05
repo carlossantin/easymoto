@@ -133,3 +133,17 @@ We will have the following response:
   ```
   [{"From":"City 2"},{"To":"City 4"},{"To":"City 6"},{"To":"City 5"},{"To":"City 3"},{"Total":"10"}]  
   ```
+
+## Ideas for improvements in future developments
+
+* For searching the shortest route we can mix Dijkstra algorithm, or any other algorithm to solve this problem, with a pre processed data approach. The shortest routes could be processed in defined intervals of time. For example, detecting that cities and distances were included or modified, a process could be launched to recalculate the distances between each city. So, having a control of the time of  last city data update and the time of last run of the pre process algorithm, it is possible to determine if there is need to calculate distances during runtime or not.
+
+* Each microservice could be deployed in a server on AWS.
+
+* The process of deploy could be automatized when a merge to the master branch is performed, by using a continuous integration and delivery tool. AWS Code Pipeline could be applied for this purpose. 
+
+* H2 database must be replaced by a database for production environments.
+
+* Tests for rest communication must be implemented.
+
+* Stress tests could be implemented.
