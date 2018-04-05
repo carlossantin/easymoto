@@ -88,6 +88,4 @@ public class WebCityController {
     return cityResponse;
   }
 
-  }
-
 }
