@@ -29,8 +29,10 @@ Each microservice is a complete independent project. This approach allows develo
 
 After clonning this project you must build and launch each microservice.
 
-  gradlew clean
-  gradlew build
+  ```
+  gradlew clean  
+  gradlew build  
+  ```
 
 To launch the microservices, run the following commands:
 
