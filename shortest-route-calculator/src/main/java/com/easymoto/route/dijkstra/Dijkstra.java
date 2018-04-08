@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Dijkstra implementation
@@ -16,39 +18,38 @@ import java.util.Set;
  */
 public class Dijkstra implements ShortestRouteProcessor {
 
-    public Graph calculateShortestPathFromSource(City[] allCities, Integer idOriginCity) {
+    public Graph calculateShortestPathFromSource(List<City> allCities, final Integer idOriginCity) {
 
         Graph graph = DijkstraUtil.createGraph(allCities);
-        Node source = null;
-        for (Node n: graph.getNodes()) {
-          if (n.getId().equals(idOriginCity)) {
-            source = n;
-            break;
-          }
-        }
+        Stream<Node> streamSource= graph.getNodes().stream().filter(n ->
+          n.getId().equals(idOriginCity));
 
-        source.setDistance(0);
+        streamSource.forEach(source -> {
 
-        Set<Node> settledNodes = new HashSet<>();
-        Set<Node> unsettledNodes = new HashSet<>();
+          source.setDistance(0);
 
-        unsettledNodes.add(source);
+          Set<Node> settledNodes = new HashSet<>();
+          Set<Node> unsettledNodes = new HashSet<>();
 
-        while (unsettledNodes.size() != 0) {
+          unsettledNodes.add(source);
+
+          while (unsettledNodes.size() != 0) {
             Node currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
             
             for (Entry<Node, Integer> adjacencyPair: currentNode.getAdjacentNodes().entrySet()) {
-                Node adjacentNode = adjacencyPair.getKey();
-                Integer edgeWeight = adjacencyPair.getValue();
+              Node adjacentNode = adjacencyPair.getKey();
+              Integer edgeWeight = adjacencyPair.getValue();
                 
-                if (!settledNodes.contains(adjacentNode)) {
-                    calculateMinimumDistance(adjacentNode, edgeWeight, currentNode);
-                    unsettledNodes.add(adjacentNode);
-                }
+              if (!settledNodes.contains(adjacentNode)) {
+                calculateMinimumDistance(adjacentNode, edgeWeight, currentNode);
+                unsettledNodes.add(adjacentNode);
+              }
             }
             settledNodes.add(currentNode);
-        }
+          }
+        });
+
         return graph;
     }
 

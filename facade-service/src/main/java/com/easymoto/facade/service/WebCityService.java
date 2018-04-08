@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -50,18 +51,17 @@ public class WebCityService {
   public City addCity(Map<String, String> payload) {
     logger.info("addCity() invoked");
     final Integer cityId = getIntegerValueFromMap(payload, "id");
-    City city = findById(cityId);
-    ResponseEntity<City> entity = null;
-    if (city == null) {
-      entity = restTemplate.postForEntity(serviceUrl + "/city/add", payload, City.class);
+    Optional<City> city = Optional.ofNullable(findById(cityId));
+    if (!city.isPresent()) {
+      restTemplate.postForEntity(serviceUrl + "/city/add", payload, City.class);
     }
     if (payload.get("to_id") != null) {
       restTemplate.postForEntity(serviceUrl + "/distance/add", payload,
         Void.class);
     }
 
-    city = findById(cityId);
-    return city;
+    city = Optional.of(findById(cityId));
+    return city.get();
   }
 
   public void removeCity(Integer id) {

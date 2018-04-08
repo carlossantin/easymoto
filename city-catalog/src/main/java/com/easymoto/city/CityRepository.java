@@ -14,7 +14,7 @@ import com.easymoto.city.domain.City;
  */
 public interface CityRepository extends CrudRepository<City, Integer> {
   /**
-   * Find an city with the specified id.
+   * Find a city with the specified id.
    *
    * @param id
    * @return The city if found, null otherwise.

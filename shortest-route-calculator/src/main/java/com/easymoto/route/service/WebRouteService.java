@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -46,11 +50,11 @@ public class WebRouteService {
    * Load all cities recorded in Database
    * @return An array of cities 
    */
-  private City[] loadAllCities() {
+  private List<City> loadAllCities() {
     logger.info("loadAllCities() invoked");
     String completeServiceUrl = String.format("%s/city/all", serviceUrl);
     ResponseEntity<City[]> entity = restTemplate.getForEntity(completeServiceUrl, City[].class);
-    return entity.getBody();
+    return Collections.unmodifiableList(Arrays.asList(entity.getBody()));
   }
 
   private City findById(Integer id) {
@@ -60,16 +64,16 @@ public class WebRouteService {
   }
 
   public List<Map<String, String>> calculateShortestRoute(Integer origin, Integer destination) {
-    City cityOrigin = findById(origin);
-    City cityDestination = findById(destination);
+    Optional<City> cityOrigin = Optional.ofNullable(findById(origin));
+    Optional<City> cityDestination = Optional.ofNullable(findById(destination));
 
-    if (cityOrigin == null || cityDestination == null) {
+    if (!cityOrigin.isPresent() || !cityDestination.isPresent()) {
       String msg = String.format("Non existing city detected. Origin: %s, Destination: %s", cityOrigin, cityDestination);
       throw new NonExistingCityException(msg);
     }
 
     ShortestRouteProcessor routeProcessor = ShortestRouteProcessorFactory.getShortestRouteProcessor();
-    final City[] allCities = loadAllCities();
+    final List<City> allCities = loadAllCities();
     final Graph graph = routeProcessor.calculateShortestPathFromSource(allCities, origin);
 
     return formatGraphToReturn(graph, origin, destination);
@@ -77,39 +81,60 @@ public class WebRouteService {
   }
 
   private List<Map<String, String>> formatGraphToReturn(Graph graph, Integer origin, Integer destination) {
-    List<Map<String, String>> result = new ArrayList();
+    final List<Map<String, String>> result = new ArrayList();
     
-    for (Node n: graph.getNodes()) {
-      if (n.getId().equals(destination)) {
-        Integer totalDistance = 0;
-        Node lastVisitedNode = null;
-        
-        for (Node nodeOnPath: n.getShortestPath()) {
-          Map data = new HashMap();
-          if (nodeOnPath.getId().equals(origin)) {
-            data.put("From", nodeOnPath.getName());
-          } else {
-            data.put("To", nodeOnPath.getName());
-          }
-          if (lastVisitedNode != null) {
-            totalDistance += lastVisitedNode.getAdjacentNodes().get(nodeOnPath);
-          }
-          lastVisitedNode = nodeOnPath;
-          result.add(data);
-        }
+    Stream<Node> streamNodeDestination = graph.getNodes().stream().filter(n ->
+      n.getId().equals(destination));
 
-        totalDistance += lastVisitedNode.getAdjacentNodes().get(n);
+    streamNodeDestination.forEach(nodeDestination -> {
+      final TotalDistance totalDistance = new TotalDistance();
+      nodeDestination.getShortestPath().forEach(nodeOnPath -> {
         Map data = new HashMap();
-        data.put("To", n.getName());
+        if (nodeOnPath.getId().equals(origin)) {
+          data.put("From", nodeOnPath.getName());
+        } else {
+          data.put("To", nodeOnPath.getName());
+        }
+        Optional<Node> lastVisitedNode = totalDistance.getLastVisitedNode();
+        if (lastVisitedNode.isPresent()) {
+          totalDistance.addDistance(lastVisitedNode.get().getAdjacentNodes().get(nodeOnPath));
+        }
+        totalDistance.setLastVisitedNode(nodeOnPath);
         result.add(data);
-        data = new HashMap();
-        data.put("Total", String.valueOf(totalDistance));
-        result.add(data);
-        break;
-      }
+      });
+
+      totalDistance.addDistance(totalDistance.getLastVisitedNode()
+                                    .get().getAdjacentNodes()
+                                    .get(nodeDestination));
+      Map data = new HashMap();
+      data.put("To", nodeDestination.getName());
+      result.add(data);
+      data = new HashMap();
+      data.put("Total", String.valueOf(totalDistance.getDistance()));
+      result.add(data);
+    });
+    return result;
+  }
+
+  private class TotalDistance {
+    private Integer distance = 0;
+    private Optional<Node> lastVisitedNode = Optional.empty();
+
+    public void addDistance(Integer distance) {
+      this.distance += distance;
     }
 
-    return result;
+    public Integer getDistance() {
+      return this.distance;
+    }
+
+    public void setLastVisitedNode(Node n) {
+      this.lastVisitedNode = Optional.ofNullable(n);
+    }
+
+    public Optional<Node> getLastVisitedNode() {
+      return this.lastVisitedNode;
+    }
   }
 
 }

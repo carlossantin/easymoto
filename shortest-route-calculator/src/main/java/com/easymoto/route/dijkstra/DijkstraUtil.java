@@ -5,8 +5,10 @@ import com.easymoto.route.dto.CityDistance;
 import com.easymoto.route.processor.Node;
 import com.easymoto.route.processor.Graph;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * Helper methods for dijkstra algorithm
@@ -14,32 +16,33 @@ import java.util.HashMap;
  */
 public class DijkstraUtil {
 
-  public static Graph createGraph(City[] cities) {
+  public static Graph createGraph(List<City> cities) {
     final Map<Integer, Node> mapNodes = new HashMap();
     
-    for (final City city: cities) {      
-      Node node = mapNodes.get(city.getId());
-      if (node == null) {
-        node = new Node(city.getId(), city.getName());
-        mapNodes.put(node.getId(), node);
+    cities.forEach((City city) -> {
+      Optional<Node> optionalNode = Optional.ofNullable(mapNodes.get(city.getId()));
+      if (!optionalNode.isPresent()) {
+        optionalNode = Optional.of(new Node(city.getId(), city.getName()));
+        mapNodes.put(optionalNode.get().getId(), optionalNode.get());
       }
+      final Node node = optionalNode.get();
       node.setName(city.getName());
 
-      for (final CityDistance cityDistance: city.getDistances()) {
-        Node nodeDestination = mapNodes.get(cityDistance.getToCity());
-        if (nodeDestination == null) {
-          nodeDestination = new Node(cityDistance.getToCity(), "");
-          mapNodes.put(nodeDestination.getId(), nodeDestination);
+      city.getDistances().forEach((CityDistance cityDistance) -> {
+        Optional<Node> nodeDestination = Optional.ofNullable(mapNodes.get(cityDistance.getToCity()));
+        if (!nodeDestination.isPresent()) {
+          nodeDestination = Optional.of(new Node(cityDistance.getToCity(), ""));
+          mapNodes.put(nodeDestination.get().getId(), nodeDestination.get());
         }
-        node.addDestination(nodeDestination, cityDistance.getDistance());
-      }
+        node.addDestination(nodeDestination.get(), cityDistance.getDistance());
+      });
 
-    }
+    });
 
     final Graph graph = new Graph();
-    for (Node node: mapNodes.values()) {
-      graph.addNode(node);
-    }
+    mapNodes.values().forEach((Node n) -> {
+      graph.addNode(n);
+    });
 
     return graph;
   }
