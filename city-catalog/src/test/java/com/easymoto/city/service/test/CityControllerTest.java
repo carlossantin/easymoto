@@ -17,6 +17,7 @@ import com.easymoto.city.exception.NonExistingCityException;
 import com.easymoto.city.exception.EqualOriginDestinationCityException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -167,7 +168,7 @@ public class CityControllerTest {
     assertEquals("newCityName", city.getName());
   }
 
-  @Test
+  @Test(expected = NoSuchElementException.class)
   public void testUpdateDistancesWhenRemovingDestinationCity() throws Exception {
     Map<String, String> payload = new HashMap();
     payload.put("id", "-8");
@@ -189,10 +190,10 @@ public class CityControllerTest {
     controller.removeCity(-9);
 
     cityFrom = controller.byId(-8);
-    assertThat(cityFrom.getDistance(cityTo)).isNull();
+    cityFrom.getDistance(cityTo);
   }
 
-  @Test
+  @Test(expected = NoSuchElementException.class)
   public void testUpdateDistancesWhenRemovingOriginCity() throws Exception {
     Map<String, String> payload = new HashMap();
     payload.put("id", "-11");
@@ -214,7 +215,7 @@ public class CityControllerTest {
     controller.removeCity(-11);
 
     cityFrom = controller.byId(-12);
-    assertThat(cityFrom.getDistance(cityFrom)).isNull();
+    cityFrom.getDistance(cityFrom);
   }
 
   @Test
@@ -228,14 +229,16 @@ public class CityControllerTest {
     assertThat(city).isNotNull();
 
     controller.removeCity(-10);
-
-    city = controller.byId(-10);
-    assertThat(city).isNull();
   }
 
   @Test(expected = NonExistingCityException.class)
   public void testRemovingNonExistingCity() throws Exception {
     controller.removeCity(-99999);
+  }
+
+  @Test(expected = NonExistingCityException.class)
+  public void gettingNonExistingCity() throws Exception {
+    controller.byId(-99999);
   }
 
   

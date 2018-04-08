@@ -4,6 +4,7 @@ import com.easymoto.facade.dto.City;
 import com.easymoto.facade.service.WebCityService;
 import com.easymoto.facade.service.WebRouteService;
 import static com.easymoto.facade.util.ValuesUtil.getIntegerValueFromMap;
+import static com.easymoto.facade.util.ValuesUtil.getStringValueFromMap;
 
 import java.util.List;
 import java.util.Map;
@@ -60,11 +61,8 @@ public class WebController {
     method = RequestMethod.POST)
   public City manageCity(@RequestBody Map<String, String> payload) {
     final Integer cityId = getIntegerValueFromMap(payload, "id");
-    final String cityName = payload.get("name");
-    final String operation = payload.get("Operation");
-    final Integer distance = getIntegerValueFromMap(payload, "distance");
-    final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
-
+    final String operation = getStringValueFromMap(payload, "Operation");
+ 
     City cityResponse = null;
 
     switch(operation) {

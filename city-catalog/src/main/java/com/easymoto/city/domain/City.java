@@ -12,11 +12,11 @@ import javax.persistence.CollectionTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.FetchType;
-import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Persistent city entity with JPA markup. Cities are stored in an H2
@@ -25,7 +25,6 @@ import java.util.ArrayList;
  * @author Carlos E. Santin <cesantin@gmail.com>
  */
 @Entity
-@Embeddable
 @Table(name = "city")
 public class City implements Serializable {
   
@@ -73,13 +72,20 @@ public class City implements Serializable {
 
   public Integer getDistance(City toCityId) {
     int idx = distances.indexOf(new CityDistance(toCityId.getId(), -1));
+    Optional<CityDistance> cityDistance = Optional.empty();
     if (idx > -1) {
-      return distances.get(idx).getDistance();
+      cityDistance = Optional.of(distances.get(idx));
     }
-    return null;
+
+    Optional<Integer> distance = Optional.empty();
+    if (cityDistance.isPresent()) {
+      distance = Optional.of(cityDistance.get().getDistance());
+    }
+
+    return distance.get();
   }
 
-  public void addDistance(City toCityId, Integer distance) {    
+  public void addDistance(City toCityId, Integer distance) {
     this.removeDistance(toCityId);
     distances.add(new CityDistance(toCityId.getId(), distance));
   }

@@ -12,7 +12,7 @@ public class CityDistance implements Serializable {
   @Column(name = "distance")
   private Integer distance;
 
-  protected CityDistance() { }
+  public CityDistance() { }
 
   public CityDistance(Integer toCity, Integer distance) {
     this.toCity = toCity;
@@ -29,7 +29,7 @@ public class CityDistance implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if(o instanceof CityDistance && ((CityDistance)o).getToCity().equals(this.toCity)) {
+    if (o instanceof CityDistance && ((CityDistance)o).getToCity().equals(this.toCity)) {
       return true;
     } else {
       return false;

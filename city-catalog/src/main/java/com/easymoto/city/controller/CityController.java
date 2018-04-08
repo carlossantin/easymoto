@@ -18,10 +18,12 @@ import com.easymoto.city.exception.MandatoryAttributeException;
 import com.easymoto.city.exception.NonExistingCityException;
 import com.easymoto.city.exception.EqualOriginDestinationCityException;
 import static com.easymoto.city.util.ValuesUtil.getIntegerValueFromMap;
+import static com.easymoto.city.util.ValuesUtil.getStringValueFromMap;
 
 import java.util.Map;
 import java.util.function.Function;
-
+import java.util.Optional;
+import java.util.NoSuchElementException;
 
 /**
  * A RESTFul controller for accessing city information.
@@ -60,10 +62,12 @@ public class CityController {
   public City byId(@PathVariable("id") Integer id) {
 
     logger.info("city-service byId() invoked: " + id);
-    City city = cityRepository.findById(id);
+    Optional<City> city = Optional.ofNullable(cityRepository.findById(id));
     logger.info("city-service byId() found: " + city);
 
-    return city;
+    return city.orElseThrow(() -> 
+        new NonExistingCityException(
+            String.format("City does not exist. Id: %s", id)));
   }
 
   /**
@@ -90,59 +94,60 @@ public class CityController {
     value="/city/add", 
     method = RequestMethod.POST)
   public City addCity(@RequestBody Map<String, String> payload) {
-    final Integer cityId = getIntegerValueFromMap(payload, "id");
-    final String cityName = payload.get("name");
+    try {
+      final Integer cityId = getIntegerValueFromMap(payload, "id");
+      final String cityName = getStringValueFromMap(payload, "name");
 
-    //Check mandatory attributes
-    if (cityId == null || cityName == null) {
-      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
+      //Check if the city already exists
+      Optional<City> city = Optional.ofNullable(cityRepository.findById(cityId));
+      if (city.isPresent()) {
+        throw new DuplicatedCityException(String.format("Duplicated city id: %s", cityId));
+      }
+
+      city = Optional.of(cityRepository.save(new City(cityId, cityName)));
+      return city.get();
+    } catch (NoSuchElementException ex) {
+      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", payload.get("id"), payload.get("name")));
     }
-
-    //Check if the city already exists
-    City city = cityRepository.findById(cityId);
-    if (city != null) {
-      throw new DuplicatedCityException(String.format("Duplicated city id: %s", cityId));
-    }
-
-    city = cityRepository.save(new City(cityId, cityName));
-    return city;
   }
 
   @RequestMapping(
     value="/distance/add", 
     method = RequestMethod.POST)
   public void addDistance(@RequestBody Map<String, String> payload) {
-    final Integer cityId = getIntegerValueFromMap(payload, "id");
-    final Integer distance = getIntegerValueFromMap(payload, "distance");
-    final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
+    try {
+      final Integer cityId = getIntegerValueFromMap(payload, "id");
+      final Integer distance = getIntegerValueFromMap(payload, "distance");
+      final Integer cityToId = getIntegerValueFromMap(payload, "to_id");
 
-    //Check mandatory attributes
-    if (cityId == null || distance == null || cityToId == null) {
-      throw new MandatoryAttributeException(String.format("{id: %s, distance: %s, to_id: %s}", cityId, distance, cityToId));
+      //Check if origin city and destination city are diferent
+      if (cityId.equals(cityToId)) {
+        throw new EqualOriginDestinationCityException(String.format("The origin city and the destination city are the same {id: %s, to_id: %s}", cityId, cityToId));
+      }
+
+      //Check if the origin city exists
+      Optional<City> cityFrom = Optional.ofNullable(cityRepository.findById(cityId));
+      if (!cityFrom.isPresent()) {
+        throw new NonExistingCityException(String.format("Origin city does not exist. Id: %s", cityId));
+      }
+
+      //Check if the destination city exists
+      Optional<City> cityTo = Optional.ofNullable(cityRepository.findById(cityToId));
+      if (!cityTo.isPresent()) {
+        throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
+      }
+
+      cityFrom.get().addDistance(cityTo.get(), distance);
+      cityFrom = Optional.of(cityRepository.save(cityFrom.get()));
+
+      cityTo.get().addDistance(cityFrom.get(), distance);
+      cityTo = Optional.of(cityRepository.save(cityTo.get()));
+    } catch (NoSuchElementException ex) {
+      throw new MandatoryAttributeException(String.format("{id: %s, distance: %s, to_id: %s}",
+                    payload.get("id"), 
+                    payload.get("distance"), 
+                    payload.get("to_id")));
     }
-
-    //Check if origin city and destination city are diferent
-    if (cityId.equals(cityToId)) {
-      throw new EqualOriginDestinationCityException(String.format("The origin city and the destination city are the same {id: %s, to_id: %s}", cityId, cityToId));
-    }
-
-    //Check if the origin city exists
-    City cityFrom = cityRepository.findById(cityId);
-    if (cityFrom == null) {
-      throw new NonExistingCityException(String.format("Origin city does not exist. Id: %s", cityId));
-    }
-
-    //Check if the destination city exists
-    City cityTo = cityRepository.findById(cityToId);
-    if (cityTo == null) {
-      throw new NonExistingCityException(String.format("Destination city does not exist. Id: %s", cityToId));
-    }
-
-    cityFrom.addDistance(cityTo, distance);
-    cityFrom = cityRepository.save(cityFrom);
-
-    cityTo.addDistance(cityFrom, distance);
-    cityTo = cityRepository.save(cityTo);
   }
 
   /**
@@ -155,24 +160,25 @@ public class CityController {
     value="/city/update", 
     method = RequestMethod.POST)
   public City updateCity(@RequestBody Map<String, String> payload) {
-    final Integer cityId = getIntegerValueFromMap(payload, "id");
-    final String cityName = payload.get("name");
+    try {
+      final Integer cityId = getIntegerValueFromMap(payload, "id");
+      final String cityName = payload.get("name");
 
-    //Check mandatory attributes
-    if (cityId == null || cityName == null) {
-      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}", cityId, cityName));
+      //Check if the city exists
+      Optional<City> city = Optional.ofNullable(cityRepository.findById(cityId));
+      if (!city.isPresent()) {
+        throw new NonExistingCityException(String.format("The city to be updated does not exist. Id: %s", cityId));
+      }
+
+      city.get().setName(cityName);
+
+      city = Optional.of(cityRepository.save(city.get()));
+      return city.get();
+    } catch (NoSuchElementException ex) {
+      throw new MandatoryAttributeException(String.format("{id: %s, name: %s}",
+                    payload.get("id"), 
+                    payload.get("name")));
     }
-
-    //Check if the city exists
-    City city = cityRepository.findById(cityId);
-    if (city == null) {
-      throw new NonExistingCityException(String.format("The city to be updated does not exist. Id: %s", cityId));
-    }
-
-    city.setName(cityName);
-
-    city = cityRepository.save(city);
-    return city;
   }
 
   /**
@@ -187,12 +193,12 @@ public class CityController {
   public void removeCity(@PathVariable("id") Integer id) {
 
     //Check if the city exists
-    final City city = cityRepository.findById(id);
-    if (city == null) {
+    final Optional<City> city = Optional.ofNullable(cityRepository.findById(id));
+    if (!city.isPresent()) {
       throw new NonExistingCityException(String.format("The city to be removed does not exist. Id: %s", id));
     }
 
-    cityRepository.delete(city);
+    cityRepository.delete(city.get());
   }
 
 
